@@ -8,6 +8,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+
 public class BancaRepository {
     private Map<String, ContBancar> conturi;
     private List<Tranzactie> tranzactii;
@@ -43,5 +50,54 @@ public class BancaRepository {
 
     public List<Tranzactie> getToateTranzactiile() {
         return tranzactii;
+    }
+
+    //Metode pentru persistenta datelor
+    public void incarcaDate() {
+        try (BufferedReader br = new BufferedReader(new FileReader("data/conturi.txt"))){
+            String linie;
+            while((linie = br.readLine()) != null) {
+                String[] date = linie.split(",");
+                if(date.length == 4) {
+                    ContBancar cont = new ContBancar(date[0], date[1], date[2], Double.parseDouble(date[3]));
+                    conturi.put(cont.getIban(), cont);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Fisierul conturi.txt nu a fost gasit sau este gol. Se va crea la prima salvare.");
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader("data/tranzactii.txt"))){
+            String linie;
+            while ((linie = br.readLine()) != null) {
+                String[] date = linie.split(",");
+                if (date.length == 5) {
+                    Tranzactie t = new Tranzactie(date[0], Double.parseDouble(date[1]), date[2], date[3], LocalDateTime.parse(date[4]));
+                    tranzactii.add(t);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Fișierul tranzactii.txt nu a fost gasit sau este gol. Se va crea la prima salvare.");
+        }
+    }
+
+    public void salveazaDate() {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("data/conturi.txt"))) {
+            for (ContBancar cont : conturi.values()) {
+                bw.write(cont.getIban() + "," + cont.getNumeUtilizator() + "," + cont.getParola() + "," + cont.getSold());
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Eroare severa la salvarea conturilor: " + e.getMessage());
+        }
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("data/tranzactii.txt"))) {
+            for (Tranzactie t : tranzactii) {
+                bw.write(t.getIdTranzactie() + "," + t.getSuma() + "," + t.getIbanSursa() + "," + t.getIbanDestinatie() + "," + t.getDataOra().toString());
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Eroare severa la salvarea tranzactiilor: " + e.getMessage());
+        }
     }
 }
