@@ -18,6 +18,14 @@ public class Tranzactie {
         this.dataOra = LocalDateTime.now();
     }
 
+    public Tranzactie(String idTranzactie, double suma, String ibanSursa, String ibanDestinatie, LocalDateTime dataOra) {
+        this.idTranzactie = idTranzactie;
+        this.suma = suma;
+        this.ibanSursa = ibanSursa;
+        this.ibanDestinatie = ibanDestinatie;
+        this.dataOra = dataOra;
+    }
+
     public String getIdTranzactie() {
         return idTranzactie;
     }
