@@ -52,8 +52,8 @@ public class BancaRepository {
         return tranzactii;
     }
 
-    public double getLimitaStandard() {
-        return limiteTranzactionare[0];
+    public double getLimitaStandard(int tipCont) {
+        return limiteTranzactionare[tipCont];
     }
 
     public void inregistreazaStatistica(int ziuaDinLuna, boolean tranzactieReusita) {
@@ -71,8 +71,8 @@ public class BancaRepository {
             String linie;
             while((linie = br.readLine()) != null) {
                 String[] date = linie.split(",");
-                if(date.length == 4) {
-                    ContBancar cont = new ContBancar(date[0], date[1], date[2], Double.parseDouble(date[3]));
+                if(date.length == 5) {
+                    ContBancar cont = new ContBancar(date[0], date[1], date[2], Double.parseDouble(date[3]), Integer.parseInt(date[4]));
                     conturi.put(cont.getIban(), cont);
                 }
             }
@@ -111,7 +111,7 @@ public class BancaRepository {
     public void salveazaDate() {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter("data/conturi.txt"))) {
             for (ContBancar cont : conturi.values()) {
-                bw.write(cont.getIban() + "," + cont.getNumeUtilizator() + "," + cont.getParola() + "," + cont.getSold());
+                bw.write(cont.getIban() + "," + cont.getNumeUtilizator() + "," + cont.getParola() + "," + cont.getSold() + "," + cont.getTipCont());
                 bw.newLine();
             }
         } catch (IOException e) {

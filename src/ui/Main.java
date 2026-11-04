@@ -63,8 +63,12 @@ public class Main {
                             System.out.print("Introdu suma de deschidere cont (RON): ");
                             double soldInitial = scanner.nextDouble();
                             scanner.nextLine(); //Curatam buffer-ul dupa citirea unui numar
+                            System.out.println("Alege tipul contului: 0 = Standard, 1 = Premium, 2 = VIP");
+                            System.out.print("Tip cont: ");
+                            int tipCont = scanner.nextInt();
+                            scanner.nextLine();
 
-                            service.inregistreazaCont(ibanNou, nume, parolaNoua, soldInitial);
+                            service.inregistreazaCont(ibanNou, nume, parolaNoua, soldInitial, tipCont);
                             System.out.println("Cont creat cu succes! Te poti loga acum.");
                             break;
 

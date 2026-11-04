@@ -15,8 +15,8 @@ public class TranzactieService {
         this.repository = repository;
     }
 
-    public void  inregistreazaCont(String iban, String numeUtilizator, String parola, double soldInitial) {
-        ContBancar contNou = new ContBancar(iban, numeUtilizator, parola, soldInitial);
+    public void  inregistreazaCont(String iban, String numeUtilizator, String parola, double soldInitial, int tipCont) {
+        ContBancar contNou = new ContBancar(iban, numeUtilizator, parola, soldInitial, tipCont);
         repository.adaugaCont(contNou);
     }
 

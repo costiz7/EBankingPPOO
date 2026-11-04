@@ -5,12 +5,14 @@ public class ContBancar {
     private String numeUtilizator;
     private String parola;
     private double sold;
+    private int tipCont;
 
-    public ContBancar(String iban, String numeUtilizator, String parola, double sold) {
+    public ContBancar(String iban, String numeUtilizator, String parola, double sold, int tipCont) {
         this.iban = iban;
         this.numeUtilizator = numeUtilizator;
         this.parola = parola;
         this.sold = sold;
+        this.tipCont = tipCont;
     }
 
     public String getIban() {
@@ -25,6 +27,7 @@ public class ContBancar {
     public double getSold() {
         return sold;
     }
+    public int getTipCont() { return tipCont; }
 
     public void adaugaBani(double suma) {
         this.sold += suma;
