@@ -52,7 +52,7 @@ public class BancaRepository {
         return tranzactii;
     }
 
-    public double getLimitaStandard(int tipCont) {
+    public double getLimita(int tipCont) {
         return limiteTranzactionare[tipCont];
     }
 
@@ -63,6 +63,10 @@ public class BancaRepository {
         } else {
             statisticiLuna[index][1]++;
         }
+    }
+
+    public int[] getStatisticiZilnice(int ziuaDinLuna) {
+        return statisticiLuna[ziuaDinLuna - 1];
     }
 
     //Metode pentru persistenta datelor

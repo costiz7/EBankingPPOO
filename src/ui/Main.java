@@ -3,10 +3,12 @@ package ui;
 import exception.ContInexistentException;
 import exception.FonduriInsuficienteException;
 import model.ContBancar;
+import model.Tranzactie;
 import repository.BancaRepository;
 import service.TranzactieService;
 
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -28,7 +30,7 @@ public class Main {
 
         System.out.println("=== Sistem E-Banking ASE ===");
 
-        // 4. Bucla Principală (Meniul)
+        // Bucla Principala (Meniul)
         while (ruleaza) {
             try {
                 if (contLogat == null) {
@@ -48,7 +50,7 @@ public class Main {
                             System.out.print("Introdu Parola: ");
                             String parola = scanner.nextLine();
 
-                            // Prindem excepția custom definită de noi
+                            // Prindem exceptia custom definita de noi
                             contLogat = service.autentificare(iban, parola);
                             System.out.println("Autentificare reusita! Bun venit, " + contLogat.getNumeUtilizator() + "!");
                             break;
@@ -68,6 +70,10 @@ public class Main {
                             int tipCont = scanner.nextInt();
                             scanner.nextLine();
 
+                            if (tipCont < 0 || tipCont > 2) {
+                                throw new IllegalArgumentException("Eroare: Tipul de cont trebuie sa fie 0, 1 sau 2!");
+                            }
+
                             service.inregistreazaCont(ibanNou, nume, parolaNoua, soldInitial, tipCont);
                             System.out.println("Cont creat cu succes! Te poti loga acum.");
                             break;
@@ -84,7 +90,9 @@ public class Main {
                     System.out.println("\n--- Meniu Cont: " + contLogat.getIban() + " ---");
                     System.out.println("1. Verifica soldul");
                     System.out.println("2. Efectueaza un transfer");
-                    System.out.println("3. Delogare");
+                    System.out.println("3. Afiseaza istoricul tranzactiilor (Raport)");
+                    System.out.println("4. Afiseaza statistica zilei curente (Matricea)");
+                    System.out.println("5. Delogare");
                     System.out.println("0. Iesire din aplicatie");
                     System.out.print("Alege o optiune: ");
 
@@ -100,14 +108,34 @@ public class Main {
                             String ibanDestinatie = scanner.nextLine();
                             System.out.print("Introdu suma de transferat: ");
                             double suma = scanner.nextDouble();
-                            scanner.nextLine(); // Curățăm buffer-ul
+                            scanner.nextLine();
 
-                            // Apelăm serviciul și tratăm ambele excepții posibile
+                            // Apelam serviciul si tratam ambele exceptii posibile
                             service.efectueazaTransfer(contLogat.getIban(), ibanDestinatie, suma);
                             System.out.println("Transfer realizat cu succes!");
                             break;
 
                         case "3":
+                            System.out.println("\n--- Istoric Tranzactii ---");
+                            List<Tranzactie> istoric = service.getIstoricCont(contLogat.getIban());
+
+                            if (istoric.isEmpty()) {
+                                System.out.println("Nu ai nicio tranzactie efectuata inca.");
+                            } else {
+                                for (Tranzactie t : istoric) {
+                                    System.out.println(t.afisareDetalii());
+                                }
+                            }
+                            System.out.println("--------------------------");
+                            break;
+
+                        case "4":
+                            System.out.println("\n--- Statistica Zilnica ---");
+                            System.out.println(service.genereazaRaportZiuaCurenta());
+                            System.out.println("--------------------------");
+                            break;
+
+                        case "5":
                             contLogat = null;
                             System.out.println("Te-ai delogat cu succes.");
                             break;
@@ -125,6 +153,8 @@ public class Main {
             } catch (InputMismatchException e) {
                 System.out.println("[Eroare de Input] Te rog sa introduci o valoare numerica valida!");
                 scanner.nextLine(); // Curatam inputul gresit pentru a preveni blocarea buclei
+            } catch (IllegalArgumentException e) {
+                System.out.println("[Eroare de Validare] " + e.getMessage());
             } catch (Exception e) {
                 System.out.println("[Eroare Necunoscuta] A aparut o problema: " + e.getMessage());
             }
