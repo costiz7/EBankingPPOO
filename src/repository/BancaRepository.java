@@ -28,7 +28,7 @@ public class BancaRepository {
         // Index 0: limita Standard, Index 1: limita Premium, Index 2: limita VIP
         this.limiteTranzactionare = new double[]{2000.0, 5000.0, 10000.0};
 
-        // Matrice cu 31 de randuri (zilele ale lunii) si 2 coloane (0 = tranzactii reusite, 1 = esuate)
+        // Matrice cu 31 de randuri (zile ale lunii) si 2 coloane (0 = tranzactii reusite, 1 = esuate)
         this.statisticiLuna = new int[31][2];
     }
 
@@ -50,6 +50,19 @@ public class BancaRepository {
 
     public List<Tranzactie> getToateTranzactiile() {
         return tranzactii;
+    }
+
+    public double getLimitaStandard() {
+        return limiteTranzactionare[0];
+    }
+
+    public void inregistreazaStatistica(int ziuaDinLuna, boolean tranzactieReusita) {
+        int index = ziuaDinLuna - 1;
+        if (tranzactieReusita) {
+            statisticiLuna[index][0]++;
+        } else {
+            statisticiLuna[index][1]++;
+        }
     }
 
     //Metode pentru persistenta datelor
@@ -79,6 +92,20 @@ public class BancaRepository {
         } catch (IOException e) {
             System.out.println("Fișierul tranzactii.txt nu a fost gasit sau este gol. Se va crea la prima salvare.");
         }
+
+        try (BufferedReader br = new BufferedReader(new FileReader("data/statistici.txt"))) {
+            String linie;
+            while ((linie = br.readLine()) != null) {
+                String[] date = linie.split(",");
+                if (date.length == 3) {
+                    int indexZi = Integer.parseInt(date[0]) - 1;
+                    statisticiLuna[indexZi][0] = Integer.parseInt(date[1]);
+                    statisticiLuna[indexZi][1] = Integer.parseInt(date[2]);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Fisierul statistici.txt nu a fost gasit. Matricea va porni de la zero.");
+        }
     }
 
     public void salveazaDate() {
@@ -98,6 +125,16 @@ public class BancaRepository {
             }
         } catch (IOException e) {
             System.out.println("Eroare severa la salvarea tranzactiilor: " + e.getMessage());
+        }
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("data/statistici.txt"))) {
+            for (int i = 0; i < statisticiLuna.length; i++) {
+                int ziua = i + 1;
+                bw.write(ziua + "," + statisticiLuna[i][0] + "," + statisticiLuna[i][1]);
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Eroare severa la salvarea statisticilor: " + e.getMessage());
         }
     }
 }
