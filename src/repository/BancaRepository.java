@@ -15,6 +15,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
+/**
+ * Clasa responsabilă cu persistența datelor și gestionarea memoriei RAM (Data Access Object / Repository).
+ *
+ * Utilizează structuri de date dinamice (HashMap pentru acces O(1) la conturi prin IBAN,
+ * ArrayList pentru stocarea secvențială a istoricului), precum și masive fundamentale:
+ * un vector unidimensional pentru limitele de transfer și o matrice bidimensională pentru statistici.
+ *
+ * Implementează operațiuni de citire/scriere (I/O) locale pentru a asigura
+ * salvarea și restaurarea stării sistemului între rulările aplicației.
+ */
 public class BancaRepository {
     private Map<String, ContBancar> conturi;
     private List<Tranzactie> tranzactii;
@@ -32,10 +42,21 @@ public class BancaRepository {
         this.statisticiLuna = new int[31][2];
     }
 
+    /**
+     * Înregistrează un cont bancar nou în memoria aplicației (în interiorul structurii HashMap).
+     *
+     * @param cont Instanța de tip ContBancar ce trebuie salvată.
+     */
     public void adaugaCont(ContBancar cont) {
         conturi.put(cont.getIban(), cont);
     }
 
+    /**
+     * Caută și returnează un cont bancar activ pe baza identificatorului unic.
+     *
+     * @param iban Șirul de caractere reprezentând IBAN-ul căutat.
+     * @return Obiectul ContBancar dacă a fost găsit, sau null dacă nu există în memorie.
+     */
     public ContBancar gasesteCont(String iban) {
         return conturi.get(iban);
     }
@@ -44,6 +65,11 @@ public class BancaRepository {
         return conturi;
     }
 
+    /**
+     * Stochează o înregistrare imuabilă a unui transfer în lista de tranzacții.
+     *
+     * @param tranzactie Instanța validă a tranzacției efectuate.
+     */
     public void adaugaTranzactie(Tranzactie tranzactie) {
         tranzactii.add(tranzactie);
     }
@@ -52,10 +78,23 @@ public class BancaRepository {
         return tranzactii;
     }
 
+    /**
+     * Extrage limita maximă de transfer per operațiune dintr-un vector unidimensional de tip double.
+     *
+     * @param tipCont Gradul clientului (0 = Standard, 1 = Premium, 2 = VIP).
+     * @return Limita financiară maximă permisă (în RON).
+     */
     public double getLimita(int tipCont) {
         return limiteTranzactionare[tipCont];
     }
 
+    /**
+     * Contorizează numărul de transferuri reușite sau eșuate pentru fiecare zi a lunii,
+     * actualizând valorile direct în matricea bidimensională in-memory.
+     *
+     * @param ziuaDinLuna Ziua calendaristică curentă (valori între 1 și 31).
+     * @param tranzactieReusita true dacă transferul s-a finalizat cu succes, false dacă a fost oprit de o validare.
+     */
     public void inregistreazaStatistica(int ziuaDinLuna, boolean tranzactieReusita) {
         int index = ziuaDinLuna - 1;
         if (tranzactieReusita) {
@@ -65,11 +104,22 @@ public class BancaRepository {
         }
     }
 
+    /**
+     * Accesează linia matricei aferentă unei zile și extrage situația de audit zilnică.
+     *
+     * @param ziuaDinLuna Ziua calendaristică interogată (1-31).
+     * @return Un vector primitiv de 2 elemente: [număr tranzacții reușite, număr tranzacții eșuate].
+     */
     public int[] getStatisticiZilnice(int ziuaDinLuna) {
         return statisticiLuna[ziuaDinLuna - 1];
     }
 
-    //Metode pentru persistenta datelor
+    /**
+     * Metodă de persistență ce parsează fișierele text (conturi.txt, tranzactii.txt, statistici.txt)
+     * și restaurează datele în structurile dinamice (Map, List, masive).
+     * Este apelată la inițializarea aplicației pentru a asigura continuitatea datelor.
+     * Folosește blocuri try-with-resources pentru închiderea automată a fluxurilor.
+     */
     public void incarcaDate() {
         try (BufferedReader br = new BufferedReader(new FileReader("data/conturi.txt"))){
             String linie;
@@ -112,6 +162,11 @@ public class BancaRepository {
         }
     }
 
+    /**
+     * Suprascrie fișierele text locale cu datele curente din memoria RAM.
+     * Iterează prin toate colecțiile și transformă obiectele în linii text structurate (CSV-like).
+     * Este apelată automat (prin ShutdownHook) la închiderea aplicației.
+     */
     public void salveazaDate() {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter("data/conturi.txt"))) {
             for (ContBancar cont : conturi.values()) {

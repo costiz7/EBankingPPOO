@@ -11,7 +11,21 @@ import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Punctul de intrare in aplicatia E-Banking.
+ * Gestioneaza interfata interactiva cu utilizatorul prin consola (CLI),
+ * capteaza exceptiile si asigura ciclul de viata al aplicatiei (Shutdown Hook).
+ */
 public class Main {
+    /**
+     * Metoda principală de execuție a programului.
+     * Inițializează componentele arhitecturale (Repository și Service), încarcă datele din fișiere,
+     * și menține bucla infinită a meniului interactiv. De asemenea, înregistrează un
+     * fir de execuție (Thread) separat pentru a garanta salvarea automată a datelor
+     * la închiderea aplicației (ShutdownHook).
+     *
+     * @param args Argumente opționale primite la linia de comandă la lansarea programului (neutilizate în această aplicație).
+     */
     public static void main(String[] args) {
         BancaRepository repository = new BancaRepository();
         repository.incarcaDate();
@@ -71,7 +85,7 @@ public class Main {
                             scanner.nextLine();
 
                             if (tipCont < 0 || tipCont > 2) {
-                                throw new IllegalArgumentException("Eroare: Tipul de cont trebuie sa fie 0, 1 sau 2!");
+                                throw new IllegalArgumentException("Tipul de cont trebuie sa fie 0, 1 sau 2!");
                             }
 
                             service.inregistreazaCont(ibanNou, nume, parolaNoua, soldInitial, tipCont);
